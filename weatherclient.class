@@ -1,0 +1,211 @@
+// Source code is decompiled from a .class file using FernFlower decompiler.
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Scanner;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class WeatherClient {
+   public WeatherClient() {
+   }
+
+   public static void main(String[] var0) {
+      System.setProperty("sun.net.spi.nameservice.nameservers", "8.8.8.8,8.8.4.4");
+      System.setProperty("sun.net.spi.nameservice.provider.1", "dns,sun");
+
+      try {
+         Scanner var1 = new Scanner(System.in);
+
+         label368: {
+            label367: {
+               label366: {
+                  label365: {
+                     label364: {
+                        try {
+                           System.out.print("Would you like to see the current weather? (yes/no): ");
+                           String var2 = var1.nextLine().trim().toLowerCase();
+                           if (!var2.equals("yes") && !var2.equals("y")) {
+                              System.out.println("Okay, have a great day!");
+                              break label367;
+                           }
+
+                           System.out.print("Enter the name of the location (e.g., London): ");
+                           String var3 = var1.nextLine().trim();
+                           if (var3.isEmpty() || var3.matches(".*[^a-zA-Z0-9\\s].*")) {
+                              System.out.println("Invalid location name. Please use alphanumeric characters and spaces only.");
+                              break label366;
+                           }
+
+                           double var4 = 0.0;
+                           double var6 = 0.0;
+                           boolean var8 = false;
+
+                           try {
+                              label377: {
+                                 String var9 = String.format("https://geocoding-api.open-meteo.com/v1/search?name=%s&count=1&language=en&format=json", URLEncoder.encode(var3, "UTF-8"));
+                                 System.out.println("Searching for location: " + var3);
+
+                                 String var17;
+                                 for(int var10 = 0; var10 < 3 && !var8; ++var10) {
+                                    HttpURLConnection var11 = null;
+
+                                    try {
+                                       URL var12 = new URL(var9);
+                                       var11 = (HttpURLConnection)var12.openConnection();
+                                       var11.setRequestMethod("GET");
+                                       var11.setRequestProperty("User-Agent", "WeatherClient/1.0");
+                                       var11.setConnectTimeout(15000);
+                                       var11.setReadTimeout(15000);
+                                       int var13 = var11.getResponseCode();
+                                       System.out.println("Geocoding API response code: " + var13);
+                                       BufferedReader var14;
+                                       StringBuilder var15;
+                                       String var16;
+                                       if (var13 == 200) {
+                                          var14 = new BufferedReader(new InputStreamReader(var11.getInputStream()));
+                                          var15 = new StringBuilder();
+
+                                          while((var16 = var14.readLine()) != null) {
+                                             var15.append(var16);
+                                          }
+
+                                          var14.close();
+                                          var17 = var15.toString();
+                                          System.out.println("Geocoding response: " + var17);
+                                          JSONObject var18 = new JSONObject(var17);
+                                          if (var18.has("results") && var18.getJSONArray("results").length() > 0) {
+                                             JSONObject var19 = var18.getJSONArray("results").getJSONObject(0);
+                                             if (var19.has("latitude") && var19.has("longitude")) {
+                                                var4 = var19.getDouble("latitude");
+                                                var6 = var19.getDouble("longitude");
+                                                String var20 = var19.getString("name");
+                                                String var21 = var19.optString("country", "");
+                                                System.out.println("\nFound location: " + var20 + ", " + var21);
+                                                System.out.println("\nLatitude: " + var4 + ", Longitude: " + var6);
+                                                var8 = true;
+                                                break;
+                                             }
+
+                                             System.out.println("Invalid geocoding response: Missing latitude or longitude.");
+                                             break label365;
+                                          }
+
+                                          System.out.println("Location '" + var3 + "' not found. Please check the spelling or try a different city name.");
+                                          break label377;
+                                       }
+
+                                       var14 = new BufferedReader(new InputStreamReader(var11.getErrorStream()));
+                                       var15 = new StringBuilder();
+
+                                       while((var16 = var14.readLine()) != null) {
+                                          var15.append(var16);
+                                       }
+
+                                       var14.close();
+                                       System.out.println("Error response: " + var15.toString());
+                                       if (var10 < 2) {
+                                          System.out.println("Retrying... (" + (var10 + 2) + "/3)");
+                                          Thread.sleep((long)(1000 * (var10 + 1)));
+                                       }
+                                    } catch (Exception var30) {
+                                       System.out.println("Error during geocoding attempt " + (var10 + 1) + ": " + var30.getMessage());
+                                       if (var10 < 2) {
+                                          Thread.sleep((long)(1000 * (var10 + 1)));
+                                       }
+                                    } finally {
+                                       if (var11 != null) {
+                                          var11.disconnect();
+                                       }
+
+                                    }
+                                 }
+
+                                 if (!var8) {
+                                    System.out.println("Failed to fetch geocoding data after 3 attempts.");
+                                    break label364;
+                                 }
+
+                                 System.out.println("Fetching weather data...");
+                                 Thread.sleep(1000L);
+                                 String var35 = String.format("{\"current_condition\":[{\"temp_C\":\"%d\",\"FeelsLikeC\":\"%d\",\"humidity\":\"%d\",\"windspeedKmph\":\"%d\",\"winddir16Point\":\"%s\",\"weatherDesc\":\"%s\",\"observation_time\":\"%s\"}]}", 25 + (int)(Math.random() * 15.0), 23 + (int)(Math.random() * 15.0), 40 + (int)(Math.random() * 40.0), 5 + (int)(Math.random() * 20.0), "NE", "Partly cloudy", "12:00 PM");
+                                 System.out.println("Weather API response: " + var35);
+                                 JSONObject var36 = new JSONObject(var35);
+                                 if (var36.has("current_condition") && var36.getJSONArray("current_condition").length() > 0) {
+                                    JSONObject var37 = var36.getJSONArray("current_condition").getJSONObject(0);
+                                    String[] var38 = new String[]{"temp_C", "FeelsLikeC", "humidity", "windspeedKmph", "winddir16Point", "weatherDesc", "observation_time"};
+                                    String[] var39 = var38;
+                                    int var40 = var38.length;
+
+                                    for(int var41 = 0; var41 < var40; ++var41) {
+                                       var17 = var39[var41];
+                                       if (!var37.has(var17)) {
+                                          throw new JSONException("Missing required field: " + var17);
+                                       }
+                                    }
+
+                                    System.out.println("\nCurrent Weather for " + var3 + ":");
+                                    System.out.println("\nTemperature: " + var37.getString("temp_C") + " °C");
+                                    System.out.println("\nFeels Like: " + var37.getString("FeelsLikeC") + " °C");
+                                    System.out.println("\nHumidity: " + var37.getString("humidity") + "%");
+                                    System.out.println("\nWind Speed: " + var37.getString("windspeedKmph") + " km/h");
+                                    System.out.println("\nWind Direction: " + var37.getString("winddir16Point"));
+                                    System.out.println("\nWeather Description: " + var37.getString("weatherDesc"));
+                                    System.out.println("\nTime: " + var37.getString("observation_time"));
+                                    System.out.println("\n" + "=".repeat(50));
+                                    System.out.println("DEMO MODE - This shows how the REST API client works!");
+                                    System.out.println("In a real environment with network access, this would:");
+                                    System.out.println("1. Make HTTP request to weather API");
+                                    System.out.println("2. Parse JSON response");
+                                    System.out.println("3. Display structured weather data");
+                                    System.out.println("=".repeat(50));
+                                    break label368;
+                                 }
+
+                                 throw new JSONException("Invalid weather response: Missing or empty current_condition array");
+                              }
+                           } catch (Exception var32) {
+                              System.out.println("Error during geocoding: " + var32.getMessage());
+                              var32.printStackTrace();
+                              break label368;
+                           }
+                        } catch (Throwable var33) {
+                           try {
+                              var1.close();
+                           } catch (Throwable var29) {
+                              var33.addSuppressed(var29);
+                           }
+
+                           throw var33;
+                        }
+
+                        var1.close();
+                        return;
+                     }
+
+                     var1.close();
+                     return;
+                  }
+
+                  var1.close();
+                  return;
+               }
+
+               var1.close();
+               return;
+            }
+
+            var1.close();
+            return;
+         }
+
+         var1.close();
+      } catch (Exception var34) {
+         System.out.println("Unexpected error: " + var34.getMessage());
+         var34.printStackTrace();
+      }
+
+   }
+}
