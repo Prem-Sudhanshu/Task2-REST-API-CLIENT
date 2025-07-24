@@ -20,6 +20,7 @@ Interns are expected to use Java libraries such as java.net.HttpURLConnection, B
 
 The deliverable is a Java program that correctly handles HTTP requests and parses JSON responses efficiently. Proper error handling (for network issues or unexpected data formats) and clean code with descriptive comments are essential.
 
+# <img width="1920" height="1080" alt="Image" src="https://github.com/user-attachments/assets/715ee5ad-7d72-4d9c-acd5-82b19533aa8c" />
 By completing this task, interns will gain practical experience with RESTful web services, which is crucial for developing connected systems like mobile apps, dashboards, and cloud-based tools. This hands-on project enhances the ability to interact with real-time data and prepares developers for integrating third-party services in future projects.
 
 As with other tasks, the solution should be documented clearly and stored in a GitHub repository. Interns are encouraged to use online platforms like YouTube, Google, and ChatGPT to explore solutions and best practices while completing the task efficiently.
